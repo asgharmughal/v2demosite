@@ -24,7 +24,12 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd ~/public_html/app
-            git pull origin main
+            if [ ! -d .git ]; then
+              git clone https://github.com/asgharmughal/v2demosite.git .
+            else
+              git pull origin main
+            fi
+            # git pull origin main
             # Optional: restart service or run build
             # pm2 restart myapp
             # docker-compose up -d
