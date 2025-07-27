@@ -1,40 +1,32 @@
-name: Deploy to VPS
+name: Deploy to VPS via SSH
 
 on:
   push:
     branches:
-      - main
+      - main  # Or your default branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Setup SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.VPS_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        cat ~/.ssh/id_ed25519
-        #ssh-keyscan -p ${{ secrets.VPS_PORT || '22' }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-        #ssh-keyscan -p 9273 v2.iifoundation.site >> ~/.ssh/known_hosts
-        echo "178.157.82.235:9273 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGXLsElwytfEcy1Gw48YGoLCARGyuuSD9tBcS85r9y1S" > ~/.ssh/known_hosts
-        cat ~/.ssh/known_hosts
-    - name: Deploy to VPS
-      run: |
-        ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT || '22' }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          rm -rf ~/asghar
-          mkdir ~/asghar
-          cd ~/asghar
-        if [ ! -d .git ]; then
-          git clone git@github.com:asgharmughal/v2demosite.git .
-        else
-          git pull origin main
-        fi
-          # git pull origin main
-          # Restart service or app (e.g., PM2, systemd, docker, etc.)
-          # e.g., pm2 restart my-app
-        EOF
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            cd ~/public_html/app
+            git pull origin main
+            # Optional: restart service or run build
+            # pm2 restart myapp
+            # docker-compose up -d
+          EOF
+
