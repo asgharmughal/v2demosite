@@ -25,16 +25,16 @@ jobs:
         cat ~/.ssh/known_hosts
     - name: Deploy to VPS
       run: |
-        ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT || '22' }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} #<< 'EOF'
-        rm -rf ~/asghar
-        mkdir ~/asghar
-        cd ~/asghar
-        #  if [ ! -d .git ]; then
-        git clone git@github.com:asgharmughal/v2demosite.git .
-        #  else
-        #    git pull origin main
-        #  fi
+        ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT || '22' }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          rm -rf ~/asghar
+          mkdir ~/asghar
+          cd ~/asghar
+        if [ ! -d .git ]; then
+          git clone git@github.com:asgharmughal/v2demosite.git .
+        else
+          git pull origin main
+        fi
           # git pull origin main
           # Restart service or app (e.g., PM2, systemd, docker, etc.)
           # e.g., pm2 restart my-app
-        #EOF
+        EOF
